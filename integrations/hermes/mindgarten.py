@@ -12,6 +12,30 @@ import urllib.request
 import urllib.parse
 import urllib.error
 
+def _load_env_fallbacks():
+    paths = [
+        os.path.expanduser(r"~\AppData\Local\hermes\.env"),
+        os.path.expanduser(r"~/.hermes/.env"),
+        os.path.join(os.path.dirname(__file__), "..", "..", ".env"),
+        os.path.join(os.path.dirname(__file__), ".env"),
+    ]
+    for p in paths:
+        if os.path.isfile(p):
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    for line in f:
+                        line = line.strip()
+                        if line and not line.startswith("#") and "=" in line:
+                            k, v = line.split("=", 1)
+                            k, v = k.strip(), v.strip().strip('"').strip("'")
+                            if k not in os.environ and k in ("MINDGARTEN_URL", "MINDGARTEN_TOKEN"):
+                                os.environ[k] = v
+            except Exception:
+                pass
+            break
+
+_load_env_fallbacks()
+
 DEFAULT_URL = os.environ.get("MINDGARTEN_URL", "http://localhost:3000")
 DEFAULT_TOKEN = os.environ.get("MINDGARTEN_TOKEN", "hermes-agent-token")
 
