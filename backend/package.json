@@ -9,7 +9,7 @@
     "test": "vitest run",
     "db:push": "prisma db push",
     "db:generate": "prisma generate",
-    "db:seed": "tsx src/scripts/seed-tokens.ts"
+    "db:seed": "node dist/scripts/seed-tokens.js"
   },
   "dependencies": {
     "@fastify/cors": "^8.4.2",
