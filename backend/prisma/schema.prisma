@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Link {
+  id          Int       @id @default(autoincrement())
+  url         String    @unique
+  title       String?   @db.VarChar(500)
+  description String?
+  faviconUrl  String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  createdBy   String    @default("user")
+
+  tags        LinkTag[]
+
+  @@index([createdAt(sort: Desc)])
+  @@index([url])
+}
+
+model Tag {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(100)
+  color       String?   @db.VarChar(7)
+  description String?
+
+  links       LinkTag[]
+
+  @@index([name])
+}
+
+model LinkTag {
+  linkId      Int
+  tagId       Int
+
+  link        Link      @relation(fields: [linkId], references: [id], onDelete: Cascade)
+  tag         Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([linkId, tagId])
+  @@index([linkId])
+  @@index([tagId])
+}
+
+model ApiToken {
+  id        Int       @id @default(autoincrement())
+  token     String    @unique
+  name      String
+  createdAt DateTime  @default(now())
+  lastUsed  DateTime?
+
+  @@index([token])
+}

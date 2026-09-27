@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: mindgarten-db
+    environment:
+      POSTGRES_DB: mindgarten
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mindgarten-api
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: "postgresql://postgres:postgres@postgres:5432/mindgarten"
+      NODE_ENV: production
+      PORT: 3000
+      HOST: "0.0.0.0"
+      CORS_ORIGIN: "http://localhost:5173,http://localhost:3000,http://192.168.0.5:5173,http://192.168.0.5:3000"
+      API_TOKEN: "${API_TOKEN:-mindgarten-secret-token}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mindgarten-web
+    ports:
+      - "5173:5173"
+    environment:
+      VITE_BACKEND_URL: "http://backend:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: mindgarten-network
+
+x-casaos:
+  architectures:
+    - amd64
+    - arm64
+  main: frontend
+  description:
+    en_us: MindGarten — Self-hosted personal knowledge and bookmark vault with native AI agent API.
+  tagline:
+    en_us: Bookmark Manager for Humans and AI Agents
+  developer: ""
+  author: ""
+  icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/linkwarden.png
+  category: Utilities
+  port_map: "5173"
+  scheme: http
+  index: /
