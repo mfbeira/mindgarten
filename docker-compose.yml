@@ -63,7 +63,7 @@ x-casaos:
     en_us: Bookmark Manager for Humans and AI Agents
   developer: ""
   author: ""
-  icon: https://cdn.jsdelivr.net/gh/walkxcode/dashboard-icons/png/linkwarden.png
+  icon: https://raw.githubusercontent.com/mfbeira/mindgarten/main/icon.png
   category: Utilities
   port_map: "5173"
   scheme: http
